@@ -28,7 +28,8 @@ export default async function handler(req, res) {
       });
     }
 
-    return res.sendStatus(200);
+    return new Response(null, { status: 200 });
+
   }
 
   return res.sendStatus(405);
