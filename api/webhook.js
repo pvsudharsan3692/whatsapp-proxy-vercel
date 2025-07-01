@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     if (mode === 'subscribe' && token === VERIFY_TOKEN) {
       return res.status(200).send(challenge);
     } else {
-      return res.sendStatus(403);
+      return new Response("Forbidden", { status: 403 });
     }
   }
 
@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     const message = body?.entry?.[0]?.changes?.[0]?.value;
 
     if (message?.statuses) {
-      return res.sendStatus(200);
+      return new Response(null, { status: 200 });
     }
 
     try {
@@ -28,12 +28,12 @@ export default async function handler(req, res) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
-      return res.sendStatus(200);
+      return new Response(null, { status: 200 });
     } catch (err) {
       console.error("Error forwarding to n8n:", err);
-      return res.sendStatus(500);
+      return new Response("Error", { status: 500 });
     }
   }
 
-  return res.sendStatus(405);
+  return new Response("Method Not Allowed", { status: 405 });
 }
