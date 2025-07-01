@@ -9,7 +9,7 @@ export default async function handler(req) {
     const token = searchParams.get("hub.verify_token");
     const challenge = searchParams.get("hub.challenge");
 
-    if (mode && token === "123456") {
+    if (mode === "subscribe" && token === "123456") {
       return new Response(challenge, { status: 200 });
     } else {
       return new Response("Forbidden", { status: 403 });
