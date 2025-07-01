@@ -24,7 +24,7 @@ export default async function handler(req) {
     const message = body?.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
 
     if (message) {
-      const webhookUrl = 'https://your-n8n-url.com/webhook-path'; // Replace with actual n8n webhook
+      const webhookUrl = 'https://pvautomationsolutions.app.n8n.cloud/webhook/cdfbc827-d1f0-40f1-84ed-f63d05b6f595'; // Replace with actual n8n webhook
       await fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
