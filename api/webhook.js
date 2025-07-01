@@ -13,36 +13,21 @@ export default async function handler(req, res) {
     }
   }
 
- if (req.method === 'POST') {
+if (req.method === 'POST') {
   const body = req.body;
-  const message = body?.entry?.[0]?.changes?.[0]?.value;
+  const value = body?.entry?.[0]?.changes?.[0]?.value;
 
-  // Ignore message statuses
-  if (message?.statuses) {
-    return res.sendStatus(200);
-  }
+  // Ignore message status updates
+  if (value?.statuses) return res.sendStatus(200);
+  if (!value?.messages) return res.sendStatus(200);
 
-  // Avoid duplicates (optional logic)
-  if (!message?.messages) {
-    return res.sendStatus(200); // no message, ignore
-  }
+  // Forward to n8n — but don't wait
+  fetch(process.env.N8N_WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  }).catch(err => console.error("n8n forwarding failed:", err));
 
-  try {
-    const response = await fetch(process.env.N8N_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      console.error("n8n webhook error:", await response.text());
-      return res.sendStatus(500); // force WhatsApp retry
-    }
-
-    return res.sendStatus(200); // ✅ tell WhatsApp we're done
-
-  } catch (err) {
-    console.error("Fetch to n8n failed:", err);
-    return res.sendStatus(500); // ❌ WhatsApp may retry
-  }
+  // Respond immediately
+  return res.sendStatus(200);
 }
