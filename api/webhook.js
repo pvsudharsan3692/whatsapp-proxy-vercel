@@ -1,7 +1,6 @@
 export default async function handler(req, res) {
-  const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
-
   if (req.method === 'GET') {
+    const VERIFY_TOKEN = "123456";
     const mode = req.query['hub.mode'];
     const token = req.query['hub.verify_token'];
     const challenge = req.query['hub.challenge'];
@@ -13,21 +12,25 @@ export default async function handler(req, res) {
     }
   }
 
-if (req.method === 'POST') {
-  const body = req.body;
-  const value = body?.entry?.[0]?.changes?.[0]?.value;
+  if (req.method === 'POST') {
+    const body = req.body;
+    const value = body?.entry?.[0]?.changes?.[0]?.value;
 
-  // Ignore message status updates
-  if (value?.statuses) return res.sendStatus(200);
-  if (!value?.messages) return res.sendStatus(200);
+    // Ignore message status updates
+    if (value?.statuses || !value?.messages) {
+      return res.sendStatus(200);
+    }
 
-  // Forward to n8n — but don't wait
-  fetch(process.env.N8N_WEBHOOK_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  }).catch(err => console.error("n8n forwarding failed:", err));
+    // Immediately respond to WhatsApp
+    res.sendStatus(200);
 
-  // Respond immediately
-  return res.sendStatus(200);
+    // Forward to n8n webhook (don’t wait)
+    fetch(process.env.N8N_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body),
+    }).catch(err => console.error("n8n forward error:", err));
+  } else {
+    res.sendStatus(404);
+  }
 }
