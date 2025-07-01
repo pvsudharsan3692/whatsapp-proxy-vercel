@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     const challenge = req.query['hub.challenge'];
 
     if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-      return res.status(200).send(challenge);
+      return new Response(null, { status: 200 }).send(challenge);
     } else {
       return new Response("Forbidden", { status: 403 });
     }
