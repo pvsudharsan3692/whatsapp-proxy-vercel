@@ -17,23 +17,20 @@ export default async function handler(req, res) {
     const body = req.body;
     const message = body?.entry?.[0]?.changes?.[0]?.value;
 
-    // Ignore template status updates
+    // Ignore status messages
     if (message?.statuses) {
-      console.log("Skipping status update");
       return res.sendStatus(200);
     }
 
-    // Forward valid messages to n8n webhook
     try {
-      const webhookUrl = process.env.N8N_WEBHOOK_URL;
-      const result = await fetch(webhookUrl, {
+      await fetch(process.env.N8N_WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(req.body),
+        body: JSON.stringify(body),
       });
-      return res.sendStatus(result.status);
+      return res.sendStatus(200);
     } catch (err) {
-      console.error("Error forwarding to n8n:", err);
+      console.error("Forwarding failed:", err);
       return res.sendStatus(500);
     }
   }
